@@ -98,14 +98,28 @@ export default function ChatBox({ chatId, user }) {
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
         {messages.map((m, i) => {
-          const isMe = m.sender?._id === user._id || m.sender === user._id;
+          // Robust ID check handling populated/unpopulated sender and user.id/_id mismatch
+          const msgSenderId = typeof m.sender === "object" ? (m.sender._id || m.sender.id) : m.sender;
+          const currentUserId = user._id || user.id;
+          const isMe = String(msgSenderId) === String(currentUserId);
+          
           return (
-            <div key={i} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+            <div key={i} className={`flex w-full ${isMe ? "justify-end" : "justify-start items-end gap-2"}`}>
+              {!isMe && (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-pink-600 flex-shrink-0 flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+                  {m.sender?.avatar ? (
+                     <img src={m.sender.avatar} alt="avatar" className="w-full h-full object-cover" />
+                  ) : (
+                     <span>{m.sender?.username?.[0]?.toUpperCase() || "?"}</span>
+                  )}
+                </div>
+              )}
+              
               <div
-                className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm ${
+                className={`max-w-[70%] px-4 py-2 text-sm shadow-md transition-all duration-200 ${
                   isMe
-                    ? "bg-blue-600 text-white rounded-br-none"
-                    : "bg-gray-700 text-gray-100 rounded-bl-none"
+                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-3xl rounded-br-sm"
+                    : "bg-gray-800 text-gray-100 border border-gray-700 rounded-3xl rounded-bl-sm"
                 }`}
               >
                 {m.content}
