@@ -42,7 +42,7 @@ export default function ChatBox({ chatId, user }) {
     const handleTyping = ({ chatId: roomChatId, userId }) => {
         if (roomChatId === chatId && userId !== user._id) {
             setIsTyping(true);
-            setTypingUser(userId); // You could fetch user name here if needed, or pass it in event
+            setTypingUser(userId);
         }
     };
 
@@ -61,9 +61,6 @@ export default function ChatBox({ chatId, user }) {
       socket.off("receive_message", handleReceiveMessage);
       socket.off("typing", handleTyping);
       socket.off("stop_typing", handleStopTyping);
-      // Don't leave chat on unmount if we want to keep receiving notifications, 
-      // but for now let's keep it simple or remove leave_chat if not needed by server logic
-      // socket.emit("leave_chat", chatId); 
     };
   }, [chatId, socket, user]);
 
@@ -92,7 +89,6 @@ export default function ChatBox({ chatId, user }) {
     if (!socket) return;
     
     if (!isTyping) {
-        // We handle "self typing" logic purely by emitting, frontend doesn't need to know self is typing
         socket.emit("typing", { chatId, userId: user._id });
     }
 
