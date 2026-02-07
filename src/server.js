@@ -42,20 +42,21 @@ const io = new Server(server, {
 const onlineUsers = new Map(); 
 
 io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
+  // console.log("🟢 User connected:", socket.id);
 
   socket.on("setup", (userData) => {
     if (userData?._id) {
-      socket.join(userData._id);
-      onlineUsers.set(userData._id, socket.id);
-      console.log(`User ${userData._id} connected`);
+      const userId = String(userData._id);
+      socket.join(userId);
+      onlineUsers.set(userId, socket.id);
+      // console.log(`User connected: ${userId} (${userData.username})`);
       io.emit("online_users", Array.from(onlineUsers.keys()));
     }
   });
 
   socket.on("join_chat", (chatId) => {
     socket.join(chatId);
-    console.log(`User joined chat room: ${chatId}`);
+    // console.log(`Socket ${socket.id} joined chat: ${chatId}`);
   });
 
   socket.on("send_message", ({ chatId, message }) => {
@@ -63,6 +64,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("typing", ({ chatId, userId }) => {
+    // console.log(`User ${userId} typing in ${chatId}`);
     socket.to(chatId).emit("typing", { chatId, userId });
   });
 
@@ -71,7 +73,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("🔴 User disconnected:", socket.id);
+    // console.log("🔴 User disconnected:", socket.id);
     // Find key (userId) by value (socket.id)
     for (const [userId, socketId] of onlineUsers.entries()) {
       if (socketId === socket.id) {
