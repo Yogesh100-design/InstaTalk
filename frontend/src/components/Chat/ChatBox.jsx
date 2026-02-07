@@ -113,7 +113,6 @@ export default function ChatBox({ chatId, user }) {
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
-      {/* Message Area */}
       <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
         {messages.map((m, i) => {
           const msgSenderId = typeof m.sender === "object" ? (m.sender._id || m.sender.id) : m.sender;
@@ -158,10 +157,8 @@ export default function ChatBox({ chatId, user }) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="p-3 md:p-4 bg-white border-t border-gray-200 flex items-center gap-2 md:gap-4">
         <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          {/* <img src={LinkImg} alt="link" className="w-5 h-5 opacity-60" />  */}
         </button>
         
         <div className="flex-1 relative">
