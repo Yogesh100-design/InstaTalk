@@ -13,6 +13,7 @@ const server = http.createServer(app);
 const allowedOrigins = [
   "http://localhost:5173",
   "https://instatalk-tyq7.onrender.com",
+  "https://instachat-ygh.netlify.app",
 ];
 
 if (process.env.FRONTEND_URL) {
