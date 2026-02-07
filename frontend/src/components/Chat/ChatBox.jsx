@@ -17,6 +17,11 @@ export default function ChatBox({ chatId, user }) {
     if (!chatId || !socket) return;
     
     socket.emit("join_chat", chatId);
+    socket.on("connect", () => {
+      // Re-join chat room on reconnection
+      console.log("Reconnected to socket, re-joining chat:", chatId);
+      socket.emit("join_chat", chatId);
+    });
 
     const loadMessages = async () => {
       try {
@@ -40,7 +45,8 @@ export default function ChatBox({ chatId, user }) {
     };
 
     const handleTyping = ({ chatId: roomChatId, userId }) => {
-        if (roomChatId === chatId && userId !== user._id) {
+        // console.log("Received typing event:", { roomChatId, userId, currentChatId: chatId, myId: user._id });
+        if (roomChatId === chatId && String(userId) !== String(user._id)) {
             setIsTyping(true);
             setTypingUser(userId);
         }

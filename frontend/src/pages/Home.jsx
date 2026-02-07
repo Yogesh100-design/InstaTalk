@@ -106,7 +106,7 @@ export default function Home() {
         <div className="flex-1 overflow-y-auto space-y-1 p-3">
           {searchTerm ? (
             users.map((u) => {
-              const isOnline = onlineUsers.includes(u._id);
+              const isOnline = onlineUsers.some(id => String(id) === String(u._id));
               return (
               <div
                 key={u._id}
@@ -130,7 +130,7 @@ export default function Home() {
                const currentUserId = user?._id || user?.id;
                const otherUser = chat.participants.find(p => String(p._id) !== String(currentUserId)) || chat.participants[0];
                const isSelected = selectedChat?._id === chat._id;
-               const isOnline = onlineUsers.includes(otherUser?._id);
+                const isOnline = onlineUsers.some(id => String(id) === String(otherUser?._id));
                
                return (
                 <div
@@ -171,7 +171,7 @@ export default function Home() {
           (() => {
             const currentUserId = user?._id || user?.id;
             const otherUser = selectedChat.participants.find(p => String(p._id) !== String(currentUserId)) || selectedChat.participants[0];
-            const isOnline = onlineUsers.includes(otherUser?._id);
+            const isOnline = onlineUsers.some(id => String(id) === String(otherUser?._id));
 
             return (
               <>

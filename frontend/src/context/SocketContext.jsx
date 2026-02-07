@@ -20,20 +20,23 @@ export const SocketProvider = ({ children }) => {
             const socketIo = io(ENDPOINT, {
                 reconnection: true,
                 timeout: 10000,
+                transports: ["websocket"],
             });
             setSocket(socketIo);
 
             socketIo.on("connect", () => {
                 console.log("Connected to socket:", socketIo.id);
+                socketIo.emit("setup", user);
             });
 
             socketIo.on("connect_error", (err) => {
                 console.error("Socket Connection Error:", err.message);
             });
 
-            socketIo.emit("setup", user);
+            // socketIo.emit("setup", user); // Removed this line as it's handled in connect
 
             socketIo.on("online_users", (users) => {
+                console.log("Online users updated:", users);
                 setOnlineUsers(users);
             });
 
