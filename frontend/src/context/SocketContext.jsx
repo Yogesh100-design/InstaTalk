@@ -24,19 +24,24 @@ export const SocketProvider = ({ children }) => {
             });
             setSocket(socketIo);
 
-            socketIo.on("connect", () => {
-                console.log("Connected to socket:", socketIo.id);
+            const handleConnect = () => {
+                // console.log("Connected to socket:", socketIo.id);
                 socketIo.emit("setup", user);
-            });
+            };
+
+            socketIo.on("connect", handleConnect);
+            
+            // If already connected by the time we add listener
+            if (socketIo.connected) {
+                handleConnect(); 
+            }
 
             socketIo.on("connect_error", (err) => {
                 console.error("Socket Connection Error:", err.message);
             });
 
-            // socketIo.emit("setup", user); // Removed this line as it's handled in connect
-
             socketIo.on("online_users", (users) => {
-                console.log("Online users updated:", users);
+                // console.log("Online users received:", users);
                 setOnlineUsers(users);
             });
 

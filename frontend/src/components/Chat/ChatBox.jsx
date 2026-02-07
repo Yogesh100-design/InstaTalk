@@ -16,12 +16,7 @@ export default function ChatBox({ chatId, user }) {
   useEffect(() => {
     if (!chatId || !socket) return;
     
-    socket.emit("join_chat", chatId);
-    socket.on("connect", () => {
-      // Re-join chat room on reconnection
-      console.log("Reconnected to socket, re-joining chat:", chatId);
-      socket.emit("join_chat", chatId);
-    });
+    // socket.emit("join_chat", chatId); // Handled below
 
     const loadMessages = async () => {
       try {
@@ -45,7 +40,6 @@ export default function ChatBox({ chatId, user }) {
     };
 
     const handleTyping = ({ chatId: roomChatId, userId }) => {
-        // console.log("Received typing event:", { roomChatId, userId, currentChatId: chatId, myId: user._id });
         if (roomChatId === chatId && String(userId) !== String(user._id)) {
             setIsTyping(true);
             setTypingUser(userId);
@@ -59,11 +53,22 @@ export default function ChatBox({ chatId, user }) {
         }
     };
 
+    const handleJoinChat = () => {
+         // console.log("Joining chat room:", chatId);
+         socket.emit("join_chat", chatId);
+    };
+
+    // Join immediately
+    if (socket.connected) handleJoinChat();
+
+    // Listeners
+    socket.on("connect", handleJoinChat); // Re-join on reconnect
     socket.on("receive_message", handleReceiveMessage);
     socket.on("typing", handleTyping);
     socket.on("stop_typing", handleStopTyping);
 
     return () => {
+      socket.off("connect", handleJoinChat);
       socket.off("receive_message", handleReceiveMessage);
       socket.off("typing", handleTyping);
       socket.off("stop_typing", handleStopTyping);
