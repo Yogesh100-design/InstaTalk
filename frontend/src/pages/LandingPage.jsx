@@ -62,14 +62,14 @@ const LandingPage = () => {
       name: "Yogesh Chavan",
       role: "Product Manager",
       company: "TechFlow Inc.",
-      content: "InstaTalk transformed our team communication. The real-time features are incredible!",
+      content: "InstaChat transformed our team communication. The real-time features are incredible!",
       rating: 5
     },
     {
       name: "Ganesh Wakchaure",
       role: "Community Manager",
       company: "StartupGrid",
-      content: "Our community engagement increased by 70% after switching to InstaTalk.",
+      content: "Our community engagement increased by 70% after switching to InstaChat.",
       rating: 5
     },
     {
@@ -120,7 +120,7 @@ const LandingPage = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <MessageSquare className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-2xl font-bold text-gray-900">InstaTalk</span>
+              <span className="ml-2 text-2xl font-bold text-gray-900">InstaChat</span>
             </div>
             
             {/* Desktop Navigation */}
@@ -372,13 +372,13 @@ const LandingPage = () => {
               Ready to Transform Your Communication?
             </h2>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Join thousands of teams who trust InstaTalk for their real-time communication needs.
+              Join thousands of teams who trust InstaChat for their real-time communication needs.
             </p>
             
             <div className="max-w-md mx-auto">
               {isSubscribed ? (
                 <div className="bg-green-500/20 border border-green-400 rounded-xl p-4">
-                  <p className="font-semibold">🎉 Thank you! We'll be in touch soon.</p>
+                  <p className="font-semibold"> Thank you! We'll be in touch soon.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-4">
@@ -412,7 +412,7 @@ const LandingPage = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-6 md:mb-0">
               <MessageSquare className="h-8 w-8 text-white" />
-              <span className="ml-2 text-2xl font-bold">InstaTalk</span>
+              <span className="ml-2 text-2xl font-bold">InstaChat</span>
             </div>
             <div className="flex space-x-6 mb-6 md:mb-0">
               {/* <a href="#" className="hover:text-indigo-300 transition-colors">Privacy</a>
@@ -421,7 +421,7 @@ const LandingPage = () => {
               <a href="#" className="hover:text-indigo-300 transition-colors">Contact</a> */}
             </div>
             <div className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} InstaTalk. All rights reserved.
+              © {new Date().getFullYear()} InstaChat. All rights reserved.
             </div>
           </div>
         </div>
