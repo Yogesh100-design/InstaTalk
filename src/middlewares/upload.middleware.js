@@ -6,15 +6,23 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     let folder = "chat_uploads";
+    let resource_type = "auto";
 
-    if (file.mimetype.startsWith("image")) folder = "chat_uploads/images";
-    else if (file.mimetype.startsWith("video")) folder = "chat_uploads/videos";
-    else folder = "chat_uploads/documents";
+    if (file.mimetype.startsWith("image")) {
+      folder = "chat_uploads/images";
+      resource_type = "image";
+    } else if (file.mimetype.startsWith("video")) {
+      folder = "chat_uploads/videos";
+      resource_type = "video";
+    } else {
+      folder = "chat_uploads/documents";
+      resource_type = "raw"; // Use raw for documents to ensure download and avoid preview issues
+    }
 
     return {
       folder,
-      resource_type: "auto",
-      public_id: `${Date.now()}-${file.originalname}`,
+      resource_type,
+      public_id: `${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_")}`,
     };
   },
 });
