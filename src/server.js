@@ -70,6 +70,25 @@ io.on("connection", (socket) => {
     socket.to(chatId).emit("stop_typing", { chatId, userId });
   });
 
+  // WebRTC Signaling
+  socket.on("call_user", ({ userToCall, signalData, from }) => {
+    io.to(userToCall).emit("call_user", { signal: signalData, from });
+  });
+
+  socket.on("answer_call", ({ to, signal }) => {
+    io.to(to).emit("call_accepted", signal);
+  });
+
+  socket.on("ice-candidate", ({ to, candidate }) => {
+    io.to(to).emit("ice-candidate", candidate);
+  });
+
+  socket.on("end_call", ({ to }) => {
+    io.to(to).emit("call_ended"); 
+  });
+
+  // End of WebRTC Signaling
+
   socket.on("disconnect", () => {
     // console.log("🔴 User disconnected:", socket.id);
     // Find key (userId) by value (socket.id)
