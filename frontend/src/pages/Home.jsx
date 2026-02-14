@@ -18,7 +18,10 @@ export default function Home() {
   const [chats, setChats] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
   
+  /* Restore full destructuring */
   const { 
+    localStream,
+    remoteStream,
     callStatus, 
     callType, 
     startCall: webRTCStartCall, 
@@ -110,6 +113,8 @@ export default function Home() {
            onReject={rejectCall}
            localVideoRef={localVideoRef}
            remoteVideoRef={remoteVideoRef}
+           localStream={localStream}
+           remoteStream={remoteStream}
            isMuted={isMuted}
            isVideoOff={isVideoOff}
            onToggleMute={toggleMute}

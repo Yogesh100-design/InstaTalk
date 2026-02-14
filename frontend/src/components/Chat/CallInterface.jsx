@@ -13,9 +13,22 @@ const CallInterface = ({
   onToggleMute,
   onToggleVideo,
   localVideoRef,
-  remoteVideoRef
+  remoteVideoRef,
+  localStream,
+  remoteStream
 }) => {
   const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    if (callStatus === "connected") {
+      if (remoteVideoRef?.current && remoteStream) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+      if (localVideoRef?.current && localStream) {
+        localVideoRef.current.srcObject = localStream;
+      }
+    }
+  }, [callStatus, remoteStream, localStream, remoteVideoRef, localVideoRef]);
 
   useEffect(() => {
     let timer;

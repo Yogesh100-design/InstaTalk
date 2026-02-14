@@ -47,7 +47,7 @@ io.on("connection", (socket) => {
       const userId = String(userData._id);
       socket.join(userId);
       onlineUsers.set(userId, socket.id);
-      // console.log(`User connected: ${userId} (${userData.username})`);
+      console.log(`User connected and joined room: ${userId} (type: ${typeof userId})`);
       io.emit("online_users", Array.from(onlineUsers.keys()));
     }
   });
@@ -71,11 +71,13 @@ io.on("connection", (socket) => {
   });
 
   // WebRTC Signaling
-  socket.on("call_user", ({ userToCall, signalData, from }) => {
-    io.to(userToCall).emit("call_user", { signal: signalData, from });
+  socket.on("call_user", ({ userToCall, signalData, from, name, avatar, callType }) => {
+    console.log("Call initiated:", { from, to: userToCall, name, callType });
+    io.to(userToCall).emit("call_user", { signal: signalData, from, name, avatar, callType });
   });
 
   socket.on("answer_call", ({ to, signal }) => {
+    console.log("Call answered, sending signal to:", to);
     io.to(to).emit("call_accepted", signal);
   });
 

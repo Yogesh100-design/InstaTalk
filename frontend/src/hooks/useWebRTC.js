@@ -17,16 +17,20 @@ const useWebRTC = (currentUser) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("call_user", ({ signal, from }) => {
-      // console.log("Incoming call from", from);
+    socket.on("call_user", ({ signal, from, name: callerName, avatar: callerAvatar, callType: type }) => {
+      console.log("Incoming call received from:", from, callerName);
+      if (!from) {
+          console.error("Received call with undefined caller ID");
+          return;
+      }
       setCallStatus("incoming");
-      setIncomingCallData({ signal, from });
-      // In a real app, you'd fetch user details for 'from' here or pass them
-      // For now, we might receive just the ID or basic info
-      // setRemoteUser({ ... }); 
+      setIncomingCallData({ signal, from, name: callerName, avatar: callerAvatar });
+      setCallType(type); // specific video or audio
+      setRemoteUser({ _id: from, username: callerName, avatar: callerAvatar }); // Set basic info for UI
     });
 
     socket.on("call_accepted", (signal) => {
+      console.log("Call accepted signal received");
       setCallStatus("connected");
       pcRef.current.setRemoteDescription(new RTCSessionDescription(signal));
     });
@@ -55,10 +59,25 @@ const useWebRTC = (currentUser) => {
     setRemoteUser(userToCall);
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: type === "video", 
-        audio: true 
-      });
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: type === "video", 
+          audio: true 
+        });
+      } catch (videoError) {
+        console.warn("Video access failed, falling back to audio only", videoError);
+        // Fallback to audio only if video failed (common if camera is busy)
+        if (type === "video") {
+           stream = await navigator.mediaDevices.getUserMedia({ 
+              video: false, 
+              audio: true 
+           });
+           setCallType("audio"); // Switch to audio mode
+        } else {
+           throw videoError;
+        }
+      }
       
       setLocalStream(stream);
       if (localVideoRef.current) {
@@ -71,11 +90,17 @@ const useWebRTC = (currentUser) => {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
+      const currentUserId = currentUser?._id || currentUser?.id;
+
       socket.emit("call_user", {
-        userToCall: userToCall._id,
+        userToCall: userToCall._id || userToCall.id,
         signalData: offer,
-        from: currentUser._id,
+        from: currentUserId,
+        name: currentUser.username,
+        avatar: currentUser.avatar,
+        callType: type
       });
+
 
     } catch (err) {
       console.error("Error starting call:", err);
@@ -87,10 +112,23 @@ const useWebRTC = (currentUser) => {
     setCallStatus("connected");
     
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: callType === "video", 
-        audio: true 
-      });
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: callType === "video", 
+          audio: true 
+        });
+      } catch (videoError) {
+         console.warn("Video access failed, falling back to audio only", videoError);
+         if (callType === "video") {
+             stream = await navigator.mediaDevices.getUserMedia({ 
+                video: false, 
+                audio: true 
+             });
+         } else {
+             throw videoError;
+         }
+      }
       
       setLocalStream(stream);
       if (localVideoRef.current) {
@@ -104,6 +142,7 @@ const useWebRTC = (currentUser) => {
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
 
+      console.log("Answering call, emitting signal to:", incomingCallData.from);
       socket.emit("answer_call", { 
         signal: answer, 
         to: incomingCallData.from 
