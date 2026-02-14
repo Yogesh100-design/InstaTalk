@@ -92,9 +92,9 @@ const CallInterface = ({
            ) : (
              // Avatar Display for Audio Calls or Non-Video State
              <div className="flex flex-col items-center justify-center gap-6 animate-pulse">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gray-700 flex items-center justify-center font-bold text-6xl text-gray-400 border-4 border-gray-600">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gray-700 flex items-center justify-center font-bold text-6xl text-gray-400 border-4 border-gray-600 overflow-hidden">
                   {remoteUser.avatar ? (
-                     <img src={remoteUser.avatar} alt="avatar" className="w-full h-full object-cover rounded-full" />
+                     <img src={remoteUser.avatar} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
                      <span className="text-white">{remoteUser.username?.[0]?.toUpperCase()}</span>
                   )}
@@ -102,6 +102,8 @@ const CallInterface = ({
                 <div className="text-gray-400 text-lg font-medium tracking-wide">
                    {callStatus === "connected" ? "Connected" : "Connecting..."}
                 </div>
+                {/* Audio Element for playing remote audio */}
+                <audio ref={remoteVideoRef} autoPlay />
              </div>
            )}
 
@@ -119,58 +121,63 @@ const CallInterface = ({
            )}
         </div>
 
-        {/* Controls */}
-        <div className="p-8 bg-gray-900/80 backdrop-blur-md flex justify-center items-center gap-6 md:gap-10 pb-10 md:pb-8">
-           
-           {callStatus === "incoming" ? (
-             <>
-                <button 
-                  onClick={onReject}
-                  className="flex flex-col items-center gap-2 group"
-                >
-                  <div className="w-16 h-16 rounded-full bg-red-500/20 text-red-500 group-hover:bg-red-500 group-hover:text-white flex items-center justify-center transition-all duration-300 ring-2 ring-red-500/50">
-                     <PhoneOff size={32} />
-                  </div>
-                  <span className="text-xs text-gray-400 font-medium">Decline</span>
-                </button>
-
-                <button 
-                  onClick={onAccept}
-                  className="flex flex-col items-center gap-2 group"
-                >
-                  <div className="w-16 h-16 rounded-full bg-green-500/20 text-green-500 group-hover:bg-green-500 group-hover:text-white flex items-center justify-center transition-all duration-300 ring-2 ring-green-500/50 animate-bounce">
-                     <Phone size={32} />
-                  </div>
-                  <span className="text-xs text-gray-400 font-medium">Accept</span>
-                </button>
-             </>
-           ) : (
-             <>
-               <button 
-                  onClick={onToggleMute}
-                  className={`p-4 rounded-full transition-all ${isMuted ? 'bg-white text-black' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
-               >
-                 {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
-               </button>
-
-               {callType === "video" && (
+         {/* Controls */}
+         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent flex justify-center items-center gap-8 pb-10">
+            
+            {callStatus === "incoming" ? (
+              <>
                  <button 
-                    onClick={onToggleVideo}
-                    className={`p-4 rounded-full transition-all ${isVideoOff ? 'bg-white text-black' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
+                   onClick={onReject}
+                   className="flex flex-col items-center gap-2 group transition-transform hover:scale-110"
+                   title="Decline Call"
                  >
-                   {isVideoOff ? <VideoOff size={24} /> : <Video size={24} />}
+                   <div className="w-16 h-16 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/30 animate-pulse">
+                      <PhoneOff size={32} />
+                   </div>
+                   <span className="text-sm font-semibold text-white drop-shadow-md">Decline</span>
                  </button>
-               )}
 
-               <button 
-                  onClick={onEnd}
-                  className="p-4 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all shadow-lg hover:shadow-red-500/30 scale-110"
-               >
-                 <PhoneOff size={28} />
-               </button>
-             </>
-           )}
-        </div>
+                 <button 
+                   onClick={onAccept}
+                   className="flex flex-col items-center gap-2 group transition-transform hover:scale-110"
+                   title="Accept Call"
+                 >
+                   <div className="w-16 h-16 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg shadow-green-500/30 animate-bounce">
+                      <Phone size={32} />
+                   </div>
+                   <span className="text-sm font-semibold text-white drop-shadow-md">Accept</span>
+                 </button>
+              </>
+            ) : (
+              <>
+                <button 
+                   onClick={onToggleMute}
+                   className={`p-4 md:p-5 rounded-full transition-all shadow-lg ${isMuted ? 'bg-white text-black hover:bg-gray-200' : 'bg-gray-700/80 text-white hover:bg-gray-600 border border-white/10'}`}
+                   title={isMuted ? "Unmute" : "Mute"}
+                >
+                  {isMuted ? <MicOff size={28} /> : <Mic size={28} />}
+                </button>
+
+                {callType === "video" && (
+                  <button 
+                     onClick={onToggleVideo}
+                     className={`p-4 md:p-5 rounded-full transition-all shadow-lg ${isVideoOff ? 'bg-white text-black hover:bg-gray-200' : 'bg-gray-700/80 text-white hover:bg-gray-600 border border-white/10'}`}
+                     title={isVideoOff ? "Turn Video On" : "Turn Video Off"}
+                  >
+                    {isVideoOff ? <VideoOff size={28} /> : <Video size={28} />}
+                  </button>
+                )}
+
+                <button 
+                   onClick={onEnd}
+                   className="p-4 md:p-5 rounded-full bg-red-600 text-white hover:bg-red-700 transition-all shadow-lg shadow-red-500/40 hover:scale-110"
+                   title="End Call"
+                >
+                  <PhoneOff size={32} />
+                </button>
+              </>
+            )}
+         </div>
       </div>
     </div>
   );
