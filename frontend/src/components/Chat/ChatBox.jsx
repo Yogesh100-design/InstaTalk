@@ -10,7 +10,7 @@ export default function ChatBox({ chatId, user }) {
   const [newMsg, setNewMsg] = useState("");
   const [loading, setLoading] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
-  const [typingUser, setTypingUser] = useState(null);
+  const [typingUsera, setTypingUser] = useState(null);
   
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);

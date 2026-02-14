@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useSocket } from "../context/SocketContext";
 import ChatBox from "../components/Chat/ChatBox";
 import ProfileModal from "../components/ProfileModal";
+import CallInterface from "../components/Chat/CallInterface";
+import { Phone, Video, MoreVertical } from "lucide-react";
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -13,6 +15,8 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [chats, setChats] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
+  const [callState, setCallState] = useState(null); // null | "incoming" | "outgoing" | "connected"
+  const [callType, setCallType] = useState("video"); // "audio" | "video"
 
   useEffect(() => {
     fetchChats();
@@ -53,9 +57,33 @@ export default function Home() {
   
   const openChat = (chat) => setSelectedChat(chat);
 
+  const startCall = (type) => {
+    setCallType(type);
+    setCallState("outgoing");
+    // Simulate connection for design demo
+    setTimeout(() => {
+       setCallState("connected");
+    }, 3000);
+  };
+
+  const endCall = () => {
+    setCallState(null);
+  };
+
   return (
     <div className="flex h-screen bg-white text-gray-900 overflow-hidden font-sans">
       {showProfile && <ProfileModal user={user} onClose={() => setShowProfile(false)} />}
+      
+      {callState && (
+        <CallInterface 
+           callType={callType}
+           callStatus={callState}
+           remoteUser={selectedChat?.participants.find(p => String(p._id) !== String(user._id)) || { username: "User" }}
+           onEnd={endCall}
+           onAccept={() => setCallState("connected")}
+           onReject={endCall}
+        />
+      )}
       
 
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-1/3 max-w-sm border-r border-gray-100 flex-col bg-white shadow-sm`}>
@@ -202,11 +230,25 @@ export default function Home() {
                         </div>
                     </div>
                     
-                     <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                        </svg>
-                    </button>
+                     <div className="flex items-center gap-1">
+                        <button 
+                          onClick={() => startCall("audio")}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                          title="Voice Call"
+                        >
+                           <Phone size={20} />
+                        </button>
+                        <button 
+                          onClick={() => startCall("video")}
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                          title="Video Call"
+                        >
+                           <Video size={20} />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+                           <MoreVertical size={20} />
+                        </button>
+                     </div>
                 </div>
                 
                 <div className="flex-1 overflow-hidden relative">
