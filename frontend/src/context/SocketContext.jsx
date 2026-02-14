@@ -18,6 +18,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (user) {
+            console.log("Connecting socket to:", ENDPOINT);
             const socketIo = io(ENDPOINT, {
                 reconnection: true,
                 timeout: 10000,
