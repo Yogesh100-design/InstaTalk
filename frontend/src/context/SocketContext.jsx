@@ -27,7 +27,7 @@ export const SocketProvider = ({ children }) => {
             setSocket(socketIo);
 
             const handleConnect = () => {
-                // console.log("Connected to socket:", socketIo.id);
+                console.log("Socket connected, emitting setup for user:", user?._id || user?.id);
                 socketIo.emit("setup", user);
             };
 

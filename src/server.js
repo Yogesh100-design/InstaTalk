@@ -44,10 +44,10 @@ io.on("connection", (socket) => {
   // console.log("🟢 User connected:", socket.id);
 
   socket.on("setup", (userData) => {
-    if (userData?._id) {
-      const userId = String(userData._id);
-      socket.join(userId);
-      onlineUsers.set(userId, socket.id);
+    const userId = userData?._id || userData?.id;
+    if (userId) {
+      socket.join(String(userId));
+      onlineUsers.set(String(userId), socket.id);
       console.log(`User connected and joined room: ${userId} (type: ${typeof userId})`);
       io.emit("online_users", Array.from(onlineUsers.keys()));
     }
