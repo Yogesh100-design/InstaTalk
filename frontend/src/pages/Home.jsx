@@ -7,6 +7,8 @@ import ProfileModal from "../components/ProfileModal";
 import CallInterface from "../components/Chat/CallInterface";
 import { Phone, Video, MoreVertical } from "lucide-react";
 
+import useWebRTC from "../hooks/useWebRTC";
+
 export default function Home() {
   const { user, logout } = useAuth();
   const { onlineUsers } = useSocket();
@@ -15,8 +17,26 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [chats, setChats] = useState([]);
   const [showProfile, setShowProfile] = useState(false);
-  const [callState, setCallState] = useState(null); // null | "incoming" | "outgoing" | "connected"
-  const [callType, setCallType] = useState("video"); // "audio" | "video"
+  
+  /* Restore full destructuring */
+  const { 
+    localStream,
+    remoteStream,
+    callStatus, 
+    callType, 
+    startCall: webRTCStartCall, 
+    answerCall, 
+    endCall, 
+    rejectCall, 
+    localVideoRef, 
+    remoteVideoRef,
+    remoteUser: webRTCRemoteUser,
+    incomingCallData,
+    isMuted,
+    isVideoOff,
+    toggleMute,
+    toggleVideo
+  } = useWebRTC(user);
 
   useEffect(() => {
     fetchChats();
@@ -58,30 +78,47 @@ export default function Home() {
   const openChat = (chat) => setSelectedChat(chat);
 
   const startCall = (type) => {
-    setCallType(type);
-    setCallState("outgoing");
-    // Simulate connection for design demo
-    setTimeout(() => {
-       setCallState("connected");
-    }, 3000);
+    const currentUserId = user?._id || user?.id;
+    const otherUser = selectedChat?.participants.find(p => String(p._id) !== String(currentUserId));
+    if (otherUser) {
+        webRTCStartCall(otherUser, type);
+    }
   };
 
-  const endCall = () => {
-    setCallState(null);
-  };
+  // Determine remote user for display
+  let displayRemoteUser = webRTCRemoteUser;
+  if (!displayRemoteUser && incomingCallData?.from) {
+      // Try to find in chats or users
+      const fromId = incomingCallData.from;
+      const foundInChats = chats.find(c => c.participants.some(p => p._id === fromId));
+      if (foundInChats) {
+          displayRemoteUser = foundInChats.participants.find(p => p._id === fromId);
+      } else {
+        // As a fallback, we display "Unknown User" or try to find in 'users' state if loaded
+         displayRemoteUser = { username: "Incoming Call...", _id: fromId };
+      }
+  }
 
   return (
     <div className="flex h-screen bg-white text-gray-900 overflow-hidden font-sans">
       {showProfile && <ProfileModal user={user} onClose={() => setShowProfile(false)} />}
       
-      {callState && (
+      {callStatus && (
         <CallInterface 
            callType={callType}
-           callStatus={callState}
-           remoteUser={selectedChat?.participants.find(p => String(p._id) !== String(user._id)) || { username: "User" }}
+           callStatus={callStatus}
+           remoteUser={displayRemoteUser || { username: "User" }}
            onEnd={endCall}
-           onAccept={() => setCallState("connected")}
-           onReject={endCall}
+           onAccept={answerCall}
+           onReject={rejectCall}
+           localVideoRef={localVideoRef}
+           remoteVideoRef={remoteVideoRef}
+           localStream={localStream}
+           remoteStream={remoteStream}
+           isMuted={isMuted}
+           isVideoOff={isVideoOff}
+           onToggleMute={toggleMute}
+           onToggleVideo={toggleVideo}
         />
       )}
       

@@ -12,8 +12,23 @@ const CallInterface = ({
   isVideoOff = false,
   onToggleMute,
   onToggleVideo,
+  localVideoRef,
+  remoteVideoRef,
+  localStream,
+  remoteStream
 }) => {
   const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    if (callStatus === "connected") {
+      if (remoteVideoRef?.current && remoteStream) {
+        remoteVideoRef.current.srcObject = remoteStream;
+      }
+      if (localVideoRef?.current && localStream) {
+        localVideoRef.current.srcObject = localStream;
+      }
+    }
+  }, [callStatus, remoteStream, localStream, remoteVideoRef, localVideoRef]);
 
   useEffect(() => {
     let timer;
@@ -64,13 +79,15 @@ const CallInterface = ({
 
         {/* Video Area */}
         <div className="flex-1 relative flex items-center justify-center bg-gray-800">
-           {/* Placeholder for Remote Stream */}
+           {/* Remote Stream */}
            {callType === "video" && callStatus === "connected" ? (
              <div className="w-full h-full bg-gray-900 relative">
-                {/* Simulated Remote Video */}
-                <div className="absolute inset-0 flex items-center justify-center text-gray-600">
-                  <span className="animate-pulse">Remote Video Stream</span>
-                </div>
+                <video 
+                  ref={remoteVideoRef} 
+                  autoPlay 
+                  playsInline 
+                  className="w-full h-full object-cover" 
+                />
              </div>
            ) : (
              // Avatar Display for Audio Calls or Non-Video State
@@ -89,11 +106,15 @@ const CallInterface = ({
            )}
 
            {/* Local Video Stream (Picture-in-Picture) */}
-           {callType === "video" && callStatus === "connected" && (
-             <div className="absolute bottom-24 right-4 w-32 h-48 md:w-48 md:h-72 bg-gray-900 rounded-xl border-2 border-gray-700 shadow-xl overflow-hidden z-20">
-                <div className="w-full h-full bg-black flex items-center justify-center">
-                   <span className="text-xs text-gray-500">You</span>
-                </div>
+           {callType === "video" && (
+             <div className={`absolute bottom-24 right-4 w-32 h-48 md:w-48 md:h-72 bg-gray-900 rounded-xl border-2 border-gray-700 shadow-xl overflow-hidden z-20 ${callStatus !== "connected" ? "hidden" : ""}`}>
+                <video 
+                  ref={localVideoRef} 
+                  autoPlay 
+                  playsInline 
+                  muted 
+                  className="w-full h-full object-cover scale-x-[-1]" 
+                />
              </div>
            )}
         </div>

@@ -47,7 +47,7 @@ io.on("connection", (socket) => {
       const userId = String(userData._id);
       socket.join(userId);
       onlineUsers.set(userId, socket.id);
-      // console.log(`User connected: ${userId} (${userData.username})`);
+      console.log(`User connected and joined room: ${userId} (type: ${typeof userId})`);
       io.emit("online_users", Array.from(onlineUsers.keys()));
     }
   });
@@ -69,6 +69,27 @@ io.on("connection", (socket) => {
   socket.on("stop_typing", ({ chatId, userId }) => {
     socket.to(chatId).emit("stop_typing", { chatId, userId });
   });
+
+  // WebRTC Signaling
+  socket.on("call_user", ({ userToCall, signalData, from, name, avatar, callType }) => {
+    console.log("Call initiated:", { from, to: userToCall, name, callType });
+    io.to(userToCall).emit("call_user", { signal: signalData, from, name, avatar, callType });
+  });
+
+  socket.on("answer_call", ({ to, signal }) => {
+    console.log("Call answered, sending signal to:", to);
+    io.to(to).emit("call_accepted", signal);
+  });
+
+  socket.on("ice-candidate", ({ to, candidate }) => {
+    io.to(to).emit("ice-candidate", candidate);
+  });
+
+  socket.on("end_call", ({ to }) => {
+    io.to(to).emit("call_ended"); 
+  });
+
+  // End of WebRTC Signaling
 
   socket.on("disconnect", () => {
     // console.log("🔴 User disconnected:", socket.id);
